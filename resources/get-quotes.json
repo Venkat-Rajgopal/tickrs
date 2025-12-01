@@ -1,0 +1,185 @@
+{
+  "quoteResponse": {
+    "result": [
+      {
+        "language": "en-IN",
+        "region": "IN",
+        "quoteType": "EQUITY",
+        "typeDisp": "Equity",
+        "quoteSourceName": "Delayed Quote",
+        "triggerable": true,
+        "customPriceAlertConfidence": "HIGH",
+        "quoteSummary": {
+          "earnings": {
+            "maxAge": 86400,
+            "earningsChart": {
+              "quarterly": [
+                {
+                  "date": "3Q2022",
+                  "actual": 15.85,
+                  "estimate": 15.73
+                },
+                {
+                  "date": "4Q2022",
+                  "actual": 17.18,
+                  "estimate": 19.77
+                },
+                {
+                  "date": "1Q2023",
+                  "actual": 21.35,
+                  "estimate": 30.0
+                },
+                {
+                  "date": "3Q2023",
+                  "actual": 22.92,
+                  "estimate": 20.46
+                }
+              ],
+              "currentQuarterEstimateDate": "4Q",
+              "currentQuarterEstimateYear": 2023,
+              "earningsDate": [
+                1721732340,
+                1722081600
+              ],
+              "isEarningsDateEstimate": true
+            },
+            "financialsChart": {
+              "yearly": [
+                {
+                  "date": 2021,
+                  "revenue": 1393264200000,
+                  "earnings": 115829300000
+                },
+                {
+                  "date": 2022,
+                  "revenue": 1587505700000,
+                  "earnings": 86693300000
+                },
+                {
+                  "date": 2023,
+                  "revenue": 1861940400000,
+                  "earnings": 104707200000
+                },
+                {
+                  "date": 2024,
+                  "revenue": 2251889900000,
+                  "earnings": 130591100000
+                }
+              ],
+              "quarterly": [
+                {
+                  "date": "2Q2023",
+                  "revenue": 490279300000,
+                  "earnings": 24930000000
+                },
+                {
+                  "date": "3Q2023",
+                  "revenue": 521570200000,
+                  "earnings": 32226300000
+                },
+                {
+                  "date": "4Q2023",
+                  "revenue": 559655700000,
+                  "earnings": 29473600000
+                },
+                {
+                  "date": "1Q2024",
+                  "revenue": 680384700000,
+                  "earnings": 43961200000
+                }
+              ]
+            },
+            "financialCurrency": "INR"
+          }
+        },
+        "currency": "INR",
+        "components": [
+          "NIFTY50.NS"
+        ],
+        "hasPrePostMarketData": false,
+        "firstTradeDateMilliseconds": 1025495100000,
+        "priceHint": 2,
+        "totalCash": 4.86322602E11,
+        "floatShares": 1131737181,
+        "ebitda": 270700904448,
+        "targetPriceHigh": 4396.0,
+        "targetPriceLow": 2781.0,
+        "targetPriceMean": 3880.0,
+        "targetPriceMedian": 3980.0,
+        "heldPercentInsiders": 16.491,
+        "heldPercentInstitutions": 46.626,
+        "regularMarketChange": 47.69995,
+        "regularMarketChangePercent": 1.3348991,
+        "regularMarketTime": 1720173600,
+        "regularMarketPrice": 3621.0,
+        "regularMarketDayHigh": 3638.0,
+        "regularMarketDayRange": "3568.0 - 3638.0",
+        "regularMarketDayLow": 3568.0,
+        "regularMarketVolume": 1635209,
+        "regularMarketPreviousClose": 3573.3,
+        "bid": 0.0,
+        "ask": 0.0,
+        "bidSize": 0,
+        "askSize": 0,
+        "exchange": "NSI",
+        "market": "in_market",
+        "messageBoardId": "finmb_874836",
+        "fullExchangeName": "NSE",
+        "shortName": "LARSEN & TOUBRO",
+        "longName": "Larsen & Toubro Limited",
+        "regularMarketOpen": 3573.3,
+        "averageDailyVolume3Month": 3286162,
+        "averageDailyVolume10Day": 2908999,
+        "beta": 0.752,
+        "fiftyTwoWeekLowChange": 1201.0,
+        "fiftyTwoWeekLowChangePercent": 0.496281,
+        "fiftyTwoWeekRange": "2420.0 - 3919.9",
+        "fiftyTwoWeekHighChange": -298.8999,
+        "fiftyTwoWeekHighChangePercent": -0.076251924,
+        "fiftyTwoWeekLow": 2420.0,
+        "fiftyTwoWeekHigh": 3919.9,
+        "exDividendDate": 1718841600,
+        "earningsTimestamp": 1715165940,
+        "earningsTimestampStart": 1721732340,
+        "earningsTimestampEnd": 1722081600,
+        "trailingAnnualDividendRate": 28.0,
+        "trailingPE": 38.54588,
+        "pegRatio": 1.45,
+        "dividendsPerShare": 24.0,
+        "dividendRate": 28.0,
+        "trailingAnnualDividendYield": 0.007835894,
+        "dividendYield": 0.77,
+        "revenue": 2.25188984E12,
+        "priceToSales": 2.2107353,
+        "marketState": "PREPRE",
+        "epsTrailingTwelveMonths": 93.94,
+        "epsForward": 116.06,
+        "epsCurrentYear": 94.61,
+        "epsNextQuarter": 30.93,
+        "priceEpsCurrentYear": 38.27291,
+        "priceEpsNextQuarter": 117.0708,
+        "sharesOutstanding": 1374850048,
+        "bookValue": 628.219,
+        "fiftyDayAverage": 3545.475,
+        "fiftyDayAverageChange": 75.5249,
+        "fiftyDayAverageChangePercent": 0.021301772,
+        "twoHundredDayAverage": 3426.3923,
+        "twoHundredDayAverageChange": 194.60767,
+        "twoHundredDayAverageChangePercent": 0.056796666,
+        "marketCap": 4978332139520,
+        "forwardPE": 31.19938,
+        "priceToBook": 5.7639136,
+        "sourceInterval": 15,
+        "exchangeDataDelayedBy": 15,
+        "exchangeTimezoneName": "Asia/Kolkata",
+        "exchangeTimezoneShortName": "IST",
+        "gmtOffSetMilliseconds": 19800000,
+        "esgPopulated": false,
+        "tradeable": false,
+        "cryptoTradeable": false,
+        "symbol": "LT.NS"
+      }
+    ],
+    "error": null
+  }
+}
