@@ -4,6 +4,8 @@ use reqwest::{Client, Response};
 use thiserror::Error;
 use url::Url;
 
+use crate::marketdata::MarketData;
+
 pub struct Twelvedata {
     client: Client,
     api_key: String,
