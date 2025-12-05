@@ -75,6 +75,7 @@ pub struct TimeSeriesResponse {
     #[serde(default)]
     pub values: Vec<TimeSeriesValue>,
     pub status: String,
+
     // Handle error cases
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,

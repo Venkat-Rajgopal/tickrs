@@ -1,12 +1,13 @@
 mod client;
 // #[warn(unused_imports)]
 mod data;
-mod marketdata;
+mod market_data;
+mod reference_data;
 use std::error::Error;
 
 use crate::client::Twelvedata;
 use crate::data::{TimeSeriesResponse, ToDataFrame};
-use crate::marketdata::MarketData;
+use crate::market_data::MarketData;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

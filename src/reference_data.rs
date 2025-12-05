@@ -1,0 +1,49 @@
+use url::Url;
+
+use crate::client::{Result, Twelvedata};
+
+pub struct ReferenceData<'a> {
+    pub client: &'a Twelvedata,
+}
+impl<'a> ReferenceData<'a> {
+    /// Example: /symbol_search?symbol=AAPL
+
+    pub fn build_symbol_search_url(&self, symbol: &str) -> Result<Url> {
+        self.client
+            .build_url("symbol_search", &[("symbol", symbol)])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use dotenv::dotenv;
+
+    use crate::{
+        client::{Result, Twelvedata},
+        reference_data::ReferenceData,
+    };
+
+    #[test]
+    fn test_get_symbol_search_url() -> Result<()> {
+        dotenv().ok();
+        let client = Twelvedata::new()?;
+        let reference_data = ReferenceData { client: &client };
+
+        let result = reference_data.build_symbol_search_url("RELIANCE")?;
+
+        // Check the base URL and endpoint
+        assert_eq!(result.scheme(), "https");
+        assert_eq!(result.host_str(), Some("api.twelvedata.com"));
+        assert_eq!(result.path(), "/symbol_search");
+
+        // Check query parameters
+        let query_params: std::collections::HashMap<_, _> = result.query_pairs().collect();
+        assert_eq!(
+            query_params.get("symbol").map(|s| s.as_ref()),
+            Some("RELIANCE")
+        );
+        assert!(query_params.contains_key("apikey"));
+
+        Ok(())
+    }
+}

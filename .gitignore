@@ -25,3 +25,6 @@
 # Build artifacts
 debug/
 release/
+
+# Example files 
+*_example.rs

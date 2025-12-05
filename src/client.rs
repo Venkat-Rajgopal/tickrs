@@ -4,7 +4,7 @@ use reqwest::{Client, Response};
 use thiserror::Error;
 use url::Url;
 
-use crate::marketdata::MarketData;
+pub type Result<T> = std::result::Result<T, TDError>;
 
 pub struct Twelvedata {
     client: Client,
@@ -26,8 +26,6 @@ pub enum TDError {
     #[error("API Response error: {0}")]
     Api(String),
 }
-
-type Result<T> = std::result::Result<T, TDError>;
 
 impl Twelvedata {
     pub fn new() -> Result<Self> {
@@ -57,20 +55,6 @@ impl Twelvedata {
         Ok(url)
     }
 
-    // From here we build the specific url
-
-    pub fn build_symbol_search_url(&self, symbol: &str) -> Result<Url> {
-        self.build_url("symbol_search", &[("symbol", symbol)])
-    }
-
-    pub fn build_time_series_url(&self, symbol: &str, interval: &str) -> Result<Url> {
-        self.build_url("time_series", &[("symbol", symbol), ("interval", interval)])
-    }
-
-    pub fn build_eod_url(&self, symbol: &str, date: &str) -> Result<Url> {
-        self.build_url("eod", &[("symbol", symbol), ("date", date)])
-    }
-
     pub async fn make_request(&self, url: Url) -> Result<Response> {
         let response = self
             .client
@@ -95,44 +79,6 @@ mod tests {
     use dotenv::dotenv;
 
     use crate::client::{Result, Twelvedata};
-
-    #[test]
-    fn test_build_url() -> Result<()> {
-        dotenv().ok();
-
-        let client = Twelvedata::new()?;
-        let url = client.build_symbol_search_url("AAPL")?;
-        assert!(url
-            .as_str()
-            .starts_with("https://api.twelvedata.com/symbol_search?symbol=AAPL&apikey="));
-        Ok(())
-    }
-
-    #[test]
-    fn test_build_time_series_url() -> Result<()> {
-        dotenv().ok();
-
-        let client = Twelvedata::new()?;
-        let url = client.build_time_series_url("RELIANCE", "1min")?;
-        assert!(url.as_str().contains("symbol=RELIANCE"));
-        assert!(url.as_str().contains("interval=1min"));
-        assert!(url
-            .as_str()
-            .starts_with("https://api.twelvedata.com/time_series?symbol=RELIANCE&interval=1min"));
-        Ok(())
-    }
-
-    #[test]
-    fn test_eod_url() -> Result<()> {
-        dotenv().ok();
-
-        let client = Twelvedata::new()?;
-        let eod_url = client.build_eod_url("TATA", "2025-11-20")?;
-        assert!(eod_url
-            .as_str()
-            .starts_with("https://api.twelvedata.com/eod?symbol=TATA&date=2025-11-20"));
-        Ok(())
-    }
 
     #[test]
     fn test_generic_build_url() -> Result<()> {
