@@ -22,11 +22,49 @@ A Rust client for the `TwelveData` API and others eventually, designed for effic
 
 ## Usage
 
-```rust
-use twelvedata::Twelvedata;
+### Market Data
 
-let client = Twelvedata::new()?;
-let url = client.build_time_series_url("AAPL", "1min")?;
-let response = client.make_request(url).await?;
+```rust
+use tickrs::client::Twelvedata;
+use tickrs::marketdata::MarketData;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let client = Twelvedata::new()?;
+    let market_data = MarketData { client: &client };
+    
+    // Get time series data with date range
+    let response = market_data.get_time_series(
+        "AAPL",
+        "1day",
+        Some("2025-11-01"),
+        Some("2025-11-30")
+    ).await?;
+    
+    let data: TimeSeriesResponse = response.json().await?;
+    let df = data.to_dataframe()?;
+    println!("{:?}", df);
+    
+    Ok(())
+}
+```
+
+### Reference Data
+
+```rust
+use tickrs::client::Twelvedata;
+use tickrs::reference_data::ReferenceData;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let client = Twelvedata::new()?;
+    let reference_data = ReferenceData { client: &client };
+    
+    // Search for symbols
+    let url = reference_data.get_symbol_search_url("RELIANCE")?;
+    println!("Symbol search URL: {}", url);
+    
+    Ok(())
+}
 ```
 
