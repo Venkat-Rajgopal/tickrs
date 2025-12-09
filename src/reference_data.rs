@@ -1,6 +1,7 @@
 use url::Url;
 
 use crate::client::{Result, Twelvedata};
+use crate::data::SymbolSearchResponse;
 
 pub struct ReferenceData<'a> {
     pub client: &'a Twelvedata,
@@ -11,6 +12,13 @@ impl<'a> ReferenceData<'a> {
     pub fn build_symbol_search_url(&self, symbol: &str) -> Result<Url> {
         self.client
             .build_url("symbol_search", &[("symbol", symbol)])
+    }
+
+    pub async fn get_symbol_search(&self, symbol: &str) -> Result<SymbolSearchResponse> {
+        let url = self.build_symbol_search_url(symbol)?;
+        let response = self.client.make_request(url).await?;
+        let data = response.json::<SymbolSearchResponse>().await?;
+        Ok(data)
     }
 }
 

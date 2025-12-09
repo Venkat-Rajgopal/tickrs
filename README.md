@@ -1,6 +1,6 @@
 # tickrs :crab:
 
-A Rust client for the `TwelveData` API and others eventually, designed for efficient time series data analysis and financial market insights.
+A Rust client for the [TwelveData API](https://twelvedata.com/docs#time-series) and others eventually, designed for efficient time series data analysis and financial market insights.
 
 >NOTE: :construction: This is an early-stage project and is still under development. Features and APIs will evolve. 
 

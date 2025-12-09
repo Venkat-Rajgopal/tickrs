@@ -2,6 +2,7 @@ use reqwest::Response;
 use url::Url;
 
 use crate::client::{Result, Twelvedata};
+use crate::data::{EodResponse, QuoteResponse, TimeSeriesResponse};
 
 // Holds a reference to the TwelveData client
 pub struct MarketData<'a> {
@@ -34,6 +35,10 @@ impl<'a> MarketData<'a> {
             .build_url("eod", &[("symbol", symbol), ("date", date)])
     }
 
+    pub fn build_quote_url(&self, symbol: &str) -> Result<Url> {
+        self.client.build_url("quote", &[("symbol", symbol)])
+    }
+
     pub async fn get_time_series(
         &self,
         symbol: &str,
@@ -43,6 +48,33 @@ impl<'a> MarketData<'a> {
     ) -> Result<Response> {
         let url = self.build_time_series_url(symbol, interval, start_date, end_date)?;
         self.client.make_request(url).await
+    }
+
+    pub async fn get_time_series_data(
+        &self,
+        symbol: &str,
+        interval: &str,
+        start_date: Option<&str>,
+        end_date: Option<&str>,
+    ) -> Result<TimeSeriesResponse> {
+        let url = self.build_time_series_url(symbol, interval, start_date, end_date)?;
+        let response = self.client.make_request(url).await?;
+        let data = response.json::<TimeSeriesResponse>().await?;
+        Ok(data)
+    }
+
+    pub async fn get_eod(&self, symbol: &str, date: &str) -> Result<EodResponse> {
+        let url = self.build_eod_url(symbol, date)?;
+        let response = self.client.make_request(url).await?;
+        let data = response.json::<EodResponse>().await?;
+        Ok(data)
+    }
+
+    pub async fn get_quote(&self, symbol: &str) -> Result<QuoteResponse> {
+        let url = self.build_quote_url(symbol)?;
+        let response = self.client.make_request(url).await?;
+        let data = response.json::<QuoteResponse>().await?;
+        Ok(data)
     }
 }
 
