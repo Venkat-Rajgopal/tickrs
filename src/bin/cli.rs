@@ -6,7 +6,7 @@ use tickrs::reference_data::ReferenceData;
 
 #[derive(Parser)]
 #[command(name = "tickrs")]
-#[command(about = "TwelveData API CLI Tool", long_about = None)]
+#[command(about = "tickrs 🦀 CLI Tool", long_about = "12Data Finance")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
