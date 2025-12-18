@@ -1,4 +1,3 @@
-use reqwest::Response;
 use url::Url;
 
 use crate::client::{Result, Twelvedata};
@@ -37,17 +36,6 @@ impl<'a> MarketData<'a> {
 
     pub fn build_quote_url(&self, symbol: &str) -> Result<Url> {
         self.client.build_url("quote", &[("symbol", symbol)])
-    }
-
-    pub async fn get_time_series(
-        &self,
-        symbol: &str,
-        interval: &str,
-        start_date: Option<&str>,
-        end_date: Option<&str>,
-    ) -> Result<Response> {
-        let url = self.build_time_series_url(symbol, interval, start_date, end_date)?;
-        self.client.make_request(url).await
     }
 
     pub async fn get_time_series_data(
@@ -164,6 +152,43 @@ mod tests {
         assert!(eod_url
             .as_str()
             .starts_with("https://api.twelvedata.com/eod?symbol=TATA&date=2025-11-20"));
+        Ok(())
+    }
+
+    // Test that validates the JSON deserialization using time_series.json
+    // This tests that get_time_series_data would correctly parse the API response
+    #[test]
+    fn test_time_series_response_deserialization() -> Result<()> {
+        use crate::data::TimeSeriesResponse;
+
+        // Load the mock response from time_series.json
+        let mock_json = include_str!("../resources/time_series.json");
+
+        // Parse the JSON - this simulates what get_time_series_data does
+        // after receiving the HTTP response
+        let result: TimeSeriesResponse = serde_json::from_str(mock_json)
+            .map_err(|e| crate::client::TDError::Api(format!("JSON parse error: {}", e)))?;
+
+        // Assert the response matches what we expect from time_series.json
+        assert_eq!(result.status, "ok");
+        assert!(result.meta.is_some());
+
+        let meta = result.meta.unwrap();
+        assert_eq!(meta.symbol, "AAPL");
+        assert_eq!(meta.interval, "1min");
+        assert_eq!(meta.currency, "USD");
+        assert_eq!(meta.exchange, "NASDAQ");
+
+        // Check that we have the expected number of values
+        assert_eq!(result.values.len(), 30);
+
+        // Check the first value
+        let first_value = &result.values[0];
+        assert_eq!(first_value.datetime, "2025-12-12 15:59:00");
+        assert_eq!(first_value.open, "278.14999");
+        assert_eq!(first_value.close, "278.37000");
+        assert_eq!(first_value.volume, Some("383024".to_string()));
+
         Ok(())
     }
 }

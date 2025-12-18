@@ -1,3 +1,5 @@
+![tickrs demo](docs/rust.GIF)
+
 # tickrs :crab:
 
 A Rust client for the [TwelveData API](https://twelvedata.com/docs#time-series) and others eventually, designed for efficient time series data analysis and financial market insights.

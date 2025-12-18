@@ -6,44 +6,22 @@ mod reference_data;
 use std::error::Error;
 
 use crate::client::Twelvedata;
-use crate::data::{TimeSeriesResponse, ToDataFrame};
+use crate::data::ToDataFrame;
 use crate::market_data::MarketData;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let client = Twelvedata::new()?;
 
-    // Example 1: Time Series
-    println!("=== Time Series Example ===\n");
     let market_data = MarketData { client: &client };
     let ts_response = market_data
-        .get_time_series("AAPL", "1day", Some("2024-11-01"), Some("2024-11-30"))
+        .get_time_series_data("AAPL", "1day", Some("2025-12-10"), Some("2025-12-15"))
         .await?;
 
-    let ts_body = ts_response.text().await?;
-
-    // Debug: Print raw response
-    // println!("Raw API Response:\n{}\n", ts_body);
-
-    let time_series: TimeSeriesResponse = serde_json::from_str(&ts_body)?;
-
-    println!("Status: {}", time_series.status);
-
-    if let Some(meta) = &time_series.meta {
-        println!("Symbol: {}", meta.symbol);
-        println!("Interval: {}", meta.interval);
+    match ts_response.to_dataframe() {
+        Ok(df) => println!("{}", df),
+        Err(e) => eprintln!("Error creating dataframe: {}", e),
     }
-
-    if let Some(msg) = &time_series.message {
-        println!("API Message: {}", msg);
-    }
-
-    println!("Data points: {}", time_series.values.len());
-
-    // Convert to DataFrame
-    let ts_df = time_series.to_dataframe()?;
-    println!("\nTime Series DataFrame:");
-    println!("{}", ts_df);
 
     // // Example 2: EOD Price
     // println!("\n=== EOD Price Example ===\n");
