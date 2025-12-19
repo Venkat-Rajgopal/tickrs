@@ -191,4 +191,43 @@ mod tests {
 
         Ok(())
     }
+
+    #[tokio::test]
+    async fn test_get_time_series_data() -> Result<()> {
+        use httpmock::prelude::*;
+
+        // Start a mock HTTP server
+        let server = MockServer::start();
+
+        // Load the mock response from time_series.json
+        let mock_json = include_str!("../resources/time_series.json");
+
+        // Configure the mock to return our test data when /time_series is called
+        let _mock = server.mock(|when, then| {
+            when.method(GET).path("/time_series");
+            then.status(200)
+                .header("content-type", "application/json")
+                .body(mock_json);
+        });
+
+        // Create a test client pointing to our mock server
+        let client = Twelvedata::new_with_base_url(&server.base_url())?;
+        let market_data = MarketData { client: &client };
+
+        // Call get_time_series_data - it will use the mock server instead of real API
+        let result = market_data
+            .get_time_series_data("AAPL", "1min", None, None)
+            .await?;
+
+        // Verify the response matches time_series.json
+        assert_eq!(result.status, "ok");
+        assert!(result.meta.is_some());
+
+        let meta = result.meta.unwrap();
+        assert_eq!(meta.symbol, "AAPL");
+        assert_eq!(meta.interval, "1min");
+        assert_eq!(result.values.len(), 30);
+
+        Ok(())
+    }
 }

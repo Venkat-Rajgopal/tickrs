@@ -80,6 +80,23 @@ mod tests {
 
     use crate::client::{Result, Twelvedata};
 
+    impl Twelvedata {
+        // Test helper to create a client with custom base_url
+        pub fn new_with_base_url(base_url: &str) -> Result<Self> {
+            use reqwest::Client;
+            use url::Url;
+
+            let api_key = "test_api_key".to_string();
+            let base_url = Url::parse(base_url)?;
+
+            Ok(Self {
+                client: Client::new(),
+                api_key,
+                base_url,
+            })
+        }
+    }
+
     #[test]
     fn test_generic_build_url() -> Result<()> {
         dotenv().ok();

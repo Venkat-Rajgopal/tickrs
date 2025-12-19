@@ -69,3 +69,7 @@ Get help for any command:
 cargo run --bin cli --help
 cargo run --bin cli time-series --help
 ```
+
+## TUI 
+(chart example)[https://github.com/ratatui/ratatui/tree/main/examples/apps/chart]
+
