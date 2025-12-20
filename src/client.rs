@@ -76,13 +76,11 @@ impl Twelvedata {
 
 #[cfg(test)]
 mod tests {
+    use crate::client::{Result, Twelvedata};
     use dotenv::dotenv;
 
-    use crate::client::{Result, Twelvedata};
-
     impl Twelvedata {
-        // Test helper to create a client with custom base_url
-        pub fn new_with_base_url(base_url: &str) -> Result<Self> {
+        pub fn test_client(base_url: &str) -> Result<Self> {
             use reqwest::Client;
             use url::Url;
 

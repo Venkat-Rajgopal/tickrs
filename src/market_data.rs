@@ -211,7 +211,7 @@ mod tests {
         });
 
         // Create a test client pointing to our mock server
-        let client = Twelvedata::new_with_base_url(&server.base_url())?;
+        let client = Twelvedata::test_client(&server.base_url())?;
         let market_data = MarketData { client: &client };
 
         // Call get_time_series_data - it will use the mock server instead of real API
