@@ -51,6 +51,7 @@ impl<'a> MarketData<'a> {
         Ok(data)
     }
 
+    #[allow(dead_code)]
     pub async fn get_eod(&self, symbol: &str, date: &str) -> Result<EodResponse> {
         let url = self.build_eod_url(symbol, date)?;
         let response = self.client.make_request(url).await?;
@@ -58,6 +59,7 @@ impl<'a> MarketData<'a> {
         Ok(data)
     }
 
+    #[allow(dead_code)]
     pub async fn get_quote(&self, symbol: &str) -> Result<QuoteResponse> {
         let url = self.build_quote_url(symbol)?;
         let response = self.client.make_request(url).await?;
