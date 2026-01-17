@@ -1,8 +1,8 @@
 use clap::{Parser, Subcommand};
-use tickrs::client::Twelvedata;
-use tickrs::data::ToDataFrame;
-use tickrs::market_data::MarketData;
-use tickrs::reference_data::ReferenceData;
+use tickrs::twelvedata::client::Twelvedata;
+use tickrs::twelvedata::data::ToDataFrame;
+use tickrs::twelvedata::market_data::MarketData;
+use tickrs::twelvedata::reference_data::ReferenceData;
 
 #[derive(Parser)]
 #[command(name = "tickrs")]
@@ -51,6 +51,9 @@ enum Commands {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
+    // Configure Polars to display all rows
+    std::env::set_var("POLARS_FMT_MAX_ROWS", "100");
+
     // Initialize the client
     let client = Twelvedata::new()?;
 
@@ -60,7 +63,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let response = reference.get_symbol_search(&symbol).await?;
 
             println!("Status: {}", response.status);
-            println!("Found {} results\n", response.data.len());
 
             match response.to_dataframe() {
                 Ok(df) => println!("{}", df),

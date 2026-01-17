@@ -1,13 +1,12 @@
-mod client;
-// #[warn(unused_imports)]
-mod data;
-mod market_data;
-mod reference_data;
+mod alpha_vantage;
+mod twelvedata;
+
 use std::error::Error;
 
-use crate::client::Twelvedata;
-use crate::data::ToDataFrame;
-use crate::market_data::MarketData;
+use crate::alpha_vantage::client::AlphaVantage;
+use crate::twelvedata::client::Twelvedata;
+use crate::twelvedata::data::ToDataFrame;
+use crate::twelvedata::market_data::MarketData;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

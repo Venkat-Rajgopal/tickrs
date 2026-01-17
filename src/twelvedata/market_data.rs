@@ -1,7 +1,7 @@
 use url::Url;
 
-use crate::client::{Result, Twelvedata};
-use crate::data::{EodResponse, QuoteResponse, TimeSeriesResponse};
+use crate::twelvedata::client::{Result, Twelvedata};
+use crate::twelvedata::data::{EodResponse, QuoteResponse, TimeSeriesResponse};
 
 // Holds a reference to the TwelveData client
 pub struct MarketData<'a> {
@@ -72,7 +72,7 @@ impl<'a> MarketData<'a> {
 mod tests {
     use dotenv::dotenv;
 
-    use crate::{
+    use crate::twelvedata::{
         client::{Result, Twelvedata},
         market_data::MarketData,
     };
@@ -161,15 +161,16 @@ mod tests {
     // This tests that get_time_series_data would correctly parse the API response
     #[test]
     fn test_time_series_response_deserialization() -> Result<()> {
-        use crate::data::TimeSeriesResponse;
+        use crate::twelvedata::data::TimeSeriesResponse;
 
         // Load the mock response from time_series.json
-        let mock_json = include_str!("../resources/time_series.json");
+        let mock_json = include_str!("../../resources/time_series.json");
 
         // Parse the JSON - this simulates what get_time_series_data does
         // after receiving the HTTP response
-        let result: TimeSeriesResponse = serde_json::from_str(mock_json)
-            .map_err(|e| crate::client::TDError::Api(format!("JSON parse error: {}", e)))?;
+        let result: TimeSeriesResponse = serde_json::from_str(mock_json).map_err(|e| {
+            crate::twelvedata::client::TDError::Api(format!("JSON parse error: {}", e))
+        })?;
 
         // Assert the response matches what we expect from time_series.json
         assert_eq!(result.status, "ok");
@@ -202,7 +203,7 @@ mod tests {
         let server = MockServer::start();
 
         // Load the mock response from time_series.json
-        let mock_json = include_str!("../resources/time_series.json");
+        let mock_json = include_str!("../../resources/time_series.json");
 
         // Configure the mock to return our test data when /time_series is called
         let _mock = server.mock(|when, then| {

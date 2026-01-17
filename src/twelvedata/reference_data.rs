@@ -1,7 +1,7 @@
 use url::Url;
 
-use crate::client::{Result, Twelvedata};
-use crate::data::SymbolSearchResponse;
+use crate::twelvedata::client::{Result, Twelvedata};
+use crate::twelvedata::data::SymbolSearchResponse;
 
 pub struct ReferenceData<'a> {
     pub client: &'a Twelvedata,
@@ -26,7 +26,7 @@ impl<'a> ReferenceData<'a> {
 mod tests {
     use dotenv::dotenv;
 
-    use crate::{
+    use crate::twelvedata::{
         client::{Result, Twelvedata},
         reference_data::ReferenceData,
     };

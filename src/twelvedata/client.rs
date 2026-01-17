@@ -76,7 +76,7 @@ impl Twelvedata {
 
 #[cfg(test)]
 mod tests {
-    use crate::client::{Result, Twelvedata};
+    use crate::twelvedata::client::{Result, Twelvedata};
     use dotenv::dotenv;
 
     impl Twelvedata {
