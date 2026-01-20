@@ -56,3 +56,27 @@ impl<'a> MarketData<'a> {
         Ok(data)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use dotenv::dotenv;
+
+    use crate::alpha_vantage::client::{AlphaVantage, Result};
+    use crate::alpha_vantage::market_data::MarketData as AlphaVantageMarket;
+
+    #[test]
+    fn test_build_time_series_url() -> Result<()> {
+        dotenv().ok();
+        let client = AlphaVantage::new()?;
+        let md = AlphaVantageMarket { client: &client };
+        let res_url = md.build_time_series_url("AAPL", "1day")?;
+
+        let url_str = res_url.as_str();
+        assert!(url_str.starts_with("https://www.alphavantage.co/query?"));
+        assert!(url_str.contains("function=TIME_SERIES_DAILY"));
+        assert!(url_str.contains("symbol=AAPL"));
+        assert!(url_str.contains("apikey="));
+
+        Ok(())
+    }
+}

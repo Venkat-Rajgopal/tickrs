@@ -30,7 +30,7 @@ pub enum AVError {
 impl AlphaVantage {
     pub fn new() -> Result<Self> {
         dotenv::dotenv().ok();
-        let api_key = env::var("ALPHA_VANTAGE_API_KEY")?;
+        let api_key = env::var("API_KEY_AV")?;
         let base_url = Url::parse("https://www.alphavantage.co")?;
 
         Ok(Self {
