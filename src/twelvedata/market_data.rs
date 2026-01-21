@@ -164,7 +164,7 @@ mod tests {
         use crate::twelvedata::data::TimeSeriesResponse;
 
         // Load the mock response from time_series.json
-        let mock_json = include_str!("../../resources/time_series.json");
+        let mock_json = include_str!("../../resources/time_series_12d.json");
 
         // Parse the JSON - this simulates what get_time_series_data does
         // after receiving the HTTP response
@@ -203,7 +203,7 @@ mod tests {
         let server = MockServer::start();
 
         // Load the mock response from time_series.json
-        let mock_json = include_str!("../../resources/time_series.json");
+        let mock_json = include_str!("../../resources/time_series_12d.json");
 
         // Configure the mock to return our test data when /time_series is called
         let _mock = server.mock(|when, then| {
