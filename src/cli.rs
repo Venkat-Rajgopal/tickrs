@@ -1,19 +1,19 @@
+use crate::twelvedata::client::Twelvedata;
+use crate::twelvedata::data::ToDataFrame;
+use crate::twelvedata::market_data::MarketData;
+use crate::twelvedata::reference_data::ReferenceData;
 use clap::{Parser, Subcommand};
-use tickrs::twelvedata::client::Twelvedata;
-use tickrs::twelvedata::data::ToDataFrame;
-use tickrs::twelvedata::market_data::MarketData;
-use tickrs::twelvedata::reference_data::ReferenceData;
 
 #[derive(Parser)]
 #[command(name = "tickrs")]
 #[command(about = "tickrs 🦀 CLI Tool", long_about = "12Data Finance")]
-struct Cli {
+pub struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    pub command: Commands,
 }
 
 #[derive(Subcommand)]
-enum Commands {
+pub enum Commands {
     /// Search for symbols
     Search {
         /// Symbol to search for (e.g., AAPL, RELIANCE)
@@ -47,8 +47,7 @@ enum Commands {
     },
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     // Configure Polars to display all rows
