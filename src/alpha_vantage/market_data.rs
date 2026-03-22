@@ -1,6 +1,7 @@
 use url::Url;
 
 use crate::alpha_vantage::client::{AlphaVantage, Result};
+use crate::alpha_vantage::data::SymbolSearchResponse;
 
 // Holds a reference to the AlphaVantage client
 pub struct MarketData<'a> {
@@ -53,6 +54,20 @@ impl<'a> MarketData<'a> {
         let url = self.build_quote_url(symbol)?;
         let response = self.client.make_request(url).await?;
         let data = response.json::<serde_json::Value>().await?;
+        Ok(data)
+    }
+
+    pub fn build_search_url(&self, keywords: &str) -> Result<Url> {
+        self.client.build_url(
+            "/query",
+            &[("function", "SYMBOL_SEARCH"), ("keywords", keywords)],
+        )
+    }
+
+    pub async fn search(&self, keywords: &str) -> Result<SymbolSearchResponse> {
+        let url = self.build_search_url(keywords)?;
+        let response = self.client.make_request(url).await?;
+        let data = response.json::<SymbolSearchResponse>().await?;
         Ok(data)
     }
 }
@@ -121,6 +136,54 @@ mod tests {
             response.weekly_time_series.get("2025-08-29").unwrap().close,
             "243.4900"
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_build_search_url() -> Result<()> {
+        let client = setup()?;
+        let md = AlphaVantageMarket { client: &client };
+        let res_url = md.build_search_url("tesco")?;
+
+        let url_str = res_url.as_str();
+        assert!(url_str.starts_with("https://www.alphavantage.co/query?"));
+        assert!(url_str.contains("function=SYMBOL_SEARCH"));
+        assert!(url_str.contains("keywords=tesco"));
+        assert!(url_str.contains("apikey="));
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_search_response_deserialization() -> Result<()> {
+        let mock_json = r#"{
+            "bestMatches": [
+                {
+                    "1. symbol": "TSCO.LON",
+                    "2. name": "Tesco PLC",
+                    "3. type": "Equity",
+                    "4. region": "United Kingdom",
+                    "5. marketOpen": "08:00",
+                    "6. marketClose": "16:30",
+                    "7. timezone": "UTC+01",
+                    "8. currency": "GBX",
+                    "9. matchScore": "0.7273"
+                }
+            ]
+        }"#;
+
+        let response: crate::alpha_vantage::data::SymbolSearchResponse =
+            serde_json::from_str(mock_json).map_err(|e| {
+                crate::alpha_vantage::client::AVError::Api(format!("JSON parse error: {}", e))
+            })?;
+
+        assert_eq!(response.best_matches.len(), 1);
+        assert_eq!(response.best_matches[0].symbol, "TSCO.LON");
+        assert_eq!(response.best_matches[0].name, "Tesco PLC");
+        assert_eq!(response.best_matches[0].instrument_type, "Equity");
+        assert_eq!(response.best_matches[0].region, "United Kingdom");
+        assert_eq!(response.best_matches[0].currency, "GBX");
 
         Ok(())
     }
