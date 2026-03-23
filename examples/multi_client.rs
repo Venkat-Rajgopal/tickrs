@@ -1,4 +1,6 @@
 use std::error::Error;
+use std::time::Duration;
+use tokio::time::sleep;
 
 // Example showing how to use either Twelvedata or AlphaVantage
 // Both follow the same pattern!
@@ -31,11 +33,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let av_client = AlphaVantage::new()?;
     let av_market = AlphaVantageMarket { client: &av_client };
 
-    let av_data = av_market.get_time_series_data("AAPL", "1day").await?;
-    println!("AlphaVantage response:\n{:#?}\n", av_data);
+    // let av_data = av_market.get_time_series_data("AAPL", "1day").await?;
+    // println!("AlphaVantage response:\n{:#?}\n", av_data);
 
     let av_quote = av_market.get_quote("AAPL").await?;
     println!("AlphaVantage quote:\n{:#?}", av_quote);
+
+    // AlphaVantage free tier: 1 request per second limit
+    println!("\nWaiting 1 second for rate limit...");
+    sleep(Duration::from_secs(1)).await;
+
+    let search_response = av_market.search("tesco").await?;
+    let matches = search_response.best_matches;
+    println!("Matching results for tesco {:?}", matches);
 
     Ok(())
 }

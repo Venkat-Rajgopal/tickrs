@@ -76,8 +76,8 @@ impl<'a> MarketData<'a> {
 mod tests {
     use dotenv::dotenv;
 
-    use crate::alpha_vantage::client::{AlphaVantage, Result};
-    use crate::alpha_vantage::data::TimeSeriesResponse;
+    use crate::alpha_vantage::client::{AVError, AlphaVantage, Result};
+    use crate::alpha_vantage::data::{SymbolSearchResponse, TimeSeriesResponse};
     use crate::alpha_vantage::market_data::MarketData as AlphaVantageMarket;
 
     fn setup() -> Result<AlphaVantage> {
@@ -173,10 +173,8 @@ mod tests {
             ]
         }"#;
 
-        let response: crate::alpha_vantage::data::SymbolSearchResponse =
-            serde_json::from_str(mock_json).map_err(|e| {
-                crate::alpha_vantage::client::AVError::Api(format!("JSON parse error: {}", e))
-            })?;
+        let response: SymbolSearchResponse = serde_json::from_str(mock_json)
+            .map_err(|e| AVError::Api(format!("JSON parse error: {}", e)))?;
 
         assert_eq!(response.best_matches.len(), 1);
         assert_eq!(response.best_matches[0].symbol, "TSCO.LON");
