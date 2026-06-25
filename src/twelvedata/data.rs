@@ -1,21 +1,10 @@
 use polars::prelude::*;
 use serde::{Deserialize, Serialize};
-// use std::io::Cursor;
 
 /// Trait for converting types to Polars DataFrame
 pub trait ToDataFrame {
     fn to_dataframe(&self) -> PolarsResult<DataFrame>;
 }
-
-/// Generic conversion for any Serialize type
-/// Uses JSON as intermediate format
-// pub fn to_dataframe_generic<T: Serialize>(data: &T) -> PolarsResult<DataFrame> {
-//     let json = serde_json::to_string(data).map_err(|e| {
-//         PolarsError::ComputeError(format!("JSON serialization failed: {}", e).into())
-//     })?;
-
-//     JsonReader::new(Cursor::new(json.as_bytes())).finish()
-// }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SymbolSearchResponse {

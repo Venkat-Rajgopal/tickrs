@@ -1,7 +1,7 @@
 use url::Url;
 
 use crate::alpha_vantage::client::{AlphaVantage, Result};
-use crate::alpha_vantage::data::SymbolSearchResponse;
+use crate::alpha_vantage::data::{SymbolSearchResponse, TimeSeriesResponse};
 
 // Holds a reference to the AlphaVantage client
 pub struct MarketData<'a> {
@@ -43,10 +43,10 @@ impl<'a> MarketData<'a> {
         &self,
         symbol: &str,
         interval: &str,
-    ) -> Result<serde_json::Value> {
+    ) -> Result<TimeSeriesResponse> {
         let url = self.build_time_series_url(symbol, interval)?;
         let response = self.client.make_request(url).await?;
-        let data = response.json::<serde_json::Value>().await?;
+        let data = response.json::<TimeSeriesResponse>().await?;
         Ok(data)
     }
 
@@ -111,31 +111,15 @@ mod tests {
             crate::alpha_vantage::client::AVError::Api(format!("JSON parse error: {}", e))
         })?;
 
-        // Assert the response matches what we expect from time_series_av.json
-        assert_eq!(response.meta_data.symbol, "IBM");
-        assert_eq!(
-            response.meta_data.information,
-            "Weekly Prices (open, high, low, close) and Volumes"
-        );
-        assert_eq!(response.meta_data.last_refreshed, "2026-01-20");
-        assert_eq!(response.meta_data.time_zone, "US/Eastern");
+        assert_eq!(response.time_series.len(), 22);
 
-        // Verify we have time series data (22 weeks in the mock file)
-        assert_eq!(response.weekly_time_series.len(), 22);
+        let jan20 = response.time_series.get("2026-01-20").unwrap();
+        assert_eq!(jan20.open, "301.3500");
+        assert_eq!(jan20.close, "291.3500");
+        assert_eq!(jan20.volume, "7211706");
 
-        // Verify specific close values
-        assert_eq!(
-            response.weekly_time_series.get("2026-01-20").unwrap().close,
-            "291.3500"
-        );
-        assert_eq!(
-            response.weekly_time_series.get("2026-01-16").unwrap().close,
-            "305.6700"
-        );
-        assert_eq!(
-            response.weekly_time_series.get("2025-08-29").unwrap().close,
-            "243.4900"
-        );
+        assert_eq!(response.time_series.get("2026-01-16").unwrap().close, "305.6700");
+        assert_eq!(response.time_series.get("2025-08-29").unwrap().close, "243.4900");
 
         Ok(())
     }

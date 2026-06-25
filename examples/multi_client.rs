@@ -35,7 +35,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // let av_data = av_market.get_time_series_data("AAPL", "1day").await?;
     // println!("AlphaVantage response:\n{:#?}\n", av_data);
-
     let av_quote = av_market.get_quote("AAPL").await?;
     println!("AlphaVantage quote:\n{:#?}", av_quote);
 

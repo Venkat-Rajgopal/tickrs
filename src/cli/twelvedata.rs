@@ -1,91 +1,33 @@
+use crate::cli::args::Commands;
 use crate::twelvedata::client::Twelvedata;
 use crate::twelvedata::data::ToDataFrame;
 use crate::twelvedata::market_data::MarketData;
 use crate::twelvedata::reference_data::ReferenceData;
-use clap::{Parser, Subcommand};
 
-#[derive(Parser)]
-#[command(name = "tickrs")]
-#[command(about = "tickrs 🦀 CLI Tool", long_about = "12Data Finance")]
-pub struct Cli {
-    #[command(subcommand)]
-    pub command: Commands,
-}
-
-#[derive(Subcommand)]
-pub enum Commands {
-    /// Search for symbols
-    Search {
-        /// Symbol to search for (e.g., AAPL, RELIANCE)
-        symbol: String,
-    },
-    /// Get time series data
-    TimeSeries {
-        /// Symbol (e.g., AAPL)
-        symbol: String,
-        /// Interval (e.g., 1min, 5min, 1h, 1day, 1week, 1month)
-        #[arg(short, long, default_value = "1day")]
-        interval: String,
-        /// Start date (YYYY-MM-DD)
-        #[arg(short, long)]
-        start: Option<String>,
-        /// End date (YYYY-MM-DD)
-        #[arg(short, long)]
-        end: Option<String>,
-    },
-    /// Get end-of-day price
-    Eod {
-        /// Symbol (e.g., AAPL)
-        symbol: String,
-        /// Date (YYYY-MM-DD)
-        date: String,
-    },
-    /// Get real-time quote
-    Quote {
-        /// Symbol (e.g., AAPL)
-        symbol: String,
-    },
-}
-
-pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
-    let cli = Cli::parse();
-
-    // Configure Polars to display all rows
-    std::env::set_var("POLARS_FMT_MAX_ROWS", "100");
-
-    // Initialize the client
+pub async fn run(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
     let client = Twelvedata::new()?;
 
-    match cli.command {
+    match command {
         Commands::Search { symbol } => {
             let reference = ReferenceData { client: &client };
             let response = reference.get_symbol_search(&symbol).await?;
-
             println!("Status: {}", response.status);
-
             match response.to_dataframe() {
                 Ok(df) => println!("{}", df),
                 Err(e) => eprintln!("Error creating DataFrame: {}", e),
             }
         }
-        Commands::TimeSeries {
-            symbol,
-            interval,
-            start,
-            end,
-        } => {
+        Commands::TimeSeries { symbol, interval, start, end } => {
             let market = MarketData { client: &client };
             let response = market
-                .get_time_series_data(&symbol, &interval, start.as_deref(), end.as_deref())
+                .get_time_series_data(&symbol, interval.as_twelvedata(), start.as_deref(), end.as_deref())
                 .await?;
-
             println!("Status: {}", response.status);
             if let Some(meta) = &response.meta {
                 println!("Symbol: {} ({})", meta.symbol, meta.exchange);
                 println!("Interval: {}", meta.interval);
             }
             println!("Data points: {}\n", response.values.len());
-
             match response.to_dataframe() {
                 Ok(df) => println!("{}", df),
                 Err(e) => eprintln!("Error creating DataFrame: {}", e),
@@ -94,7 +36,6 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Eod { symbol, date } => {
             let market = MarketData { client: &client };
             let response = market.get_eod(&symbol, &date).await?;
-
             match response.to_dataframe() {
                 Ok(df) => println!("{}", df),
                 Err(e) => eprintln!("Error creating DataFrame: {}", e),
@@ -103,7 +44,6 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Quote { symbol } => {
             let market = MarketData { client: &client };
             let response = market.get_quote(&symbol).await?;
-
             println!("Symbol: {} - {}", response.symbol, response.name);
             println!("Exchange: {} ({})", response.exchange, response.mic_code);
             println!("Time: {}", response.datetime);
@@ -112,12 +52,8 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             println!("  High:  {} {}", response.high, response.currency);
             println!("  Low:   {} {}", response.low, response.currency);
             println!("  Close: {} {}", response.close, response.currency);
-            println!(
-                "\nChange: {} ({}%)",
-                response.change, response.percent_change
-            );
+            println!("\nChange: {} ({}%)", response.change, response.percent_change);
             println!("Volume: {}\n", response.volume);
-
             match response.to_dataframe() {
                 Ok(df) => println!("{}", df),
                 Err(e) => eprintln!("Error creating DataFrame: {}", e),
