@@ -1,75 +1,73 @@
-# TwelveData CLI Tool
+# tickrs CLI
 
-A command-line interface for querying the TwelveData API.
+A command-line interface for querying financial market data from TwelveData and Alpha Vantage.
 
 ## Setup
 
-Ensure your API key is set in the `.env` file:
+Create a `.env` file in the project root:
 ```
-API_KEY=your_api_key_here
+API_KEY=<TwelveData API key>
+API_KEY_AV=<Alpha Vantage API key>
 ```
 
-## Usage
+## Providers
+
+Use `-p` / `--provider` to select the data source (default: `12d`):
+
+| Flag | Provider |
+|------|----------|
+| `-p 12d` | TwelveData (default) |
+| `-p av` | Alpha Vantage |
+
+## Commands
 
 ### Symbol Search
-Search for symbols across exchanges:
 ```bash
-cargo run --bin cli search AAPL
-cargo run --bin cli search RELIANCE
+cargo run -- search AAPL
+cargo run -- search Tesla
+
+# Alpha Vantage
+cargo run -- -p av search AAPL
 ```
 
-### Time Series Data
-Get historical price data:
+### Time Series (OHLCV)
 ```bash
-# Default (1 day interval, all available data)
-cargo run --bin cli time-series AAPL
+# Default: TwelveData, 1day interval
+cargo run -- time-series AAPL
 
-# With custom interval
-cargo run --bin cli time-series AAPL --interval 1h
+# With interval (1min 5min 15min 30min 1h 1day 1week 1month)
+cargo run -- time-series AAPL -i 1week
 
-# With date range
-cargo run --bin cli time-series AAPL --start 2025-11-01 --end 2025-11-15
+# With date range (TwelveData only)
+cargo run -- time-series AAPL -i 1day -s 2025-11-01 -e 2025-11-30
 
-# Short form
-cargo run --bin cli time-series AAPL -s 2025-11-01 -e 2025-11-15
+# Alpha Vantage
+cargo run -- -p av time-series AAPL -i 1week
 ```
 
-Available intervals: `1min`, `5min`, `15min`, `30min`, `1h`, `4h`, `1day`, `1week`, `1month`
-
-### End-of-Day Price
-Get the closing price for a specific date:
+### End-of-Day Price (TwelveData only)
 ```bash
-cargo run --bin cli eod AAPL 2025-12-01
-cargo run --bin cli eod RELIANCE 2025-11-30
+cargo run -- eod AAPL 2025-12-01
 ```
 
 ### Real-time Quote
-Get current market data:
 ```bash
-cargo run --bin cli quote AAPL
-cargo run --bin cli quote MSFT
-```
+cargo run -- quote AAPL
 
-## Examples Output
-
-All commands return data as nicely formatted Polars DataFrames for easy viewing.
-
-## Building for Production
-
-Build an optimized binary:
-```bash
-cargo build --release --bin cli
-./target/release/cli quote AAPL
+# Alpha Vantage
+cargo run -- -p av quote AAPL
 ```
 
 ## Help
 
-Get help for any command:
 ```bash
-cargo run --bin cli --help
-cargo run --bin cli time-series --help
+cargo run -- --help
+cargo run -- time-series --help
 ```
 
-## TUI 
-(chart example)[https://github.com/ratatui/ratatui/tree/main/examples/apps/chart]
+## Release Build
 
+```bash
+cargo build --release
+./target/release/tickrs -p av time-series AAPL -i 1day
+```

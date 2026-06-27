@@ -8,71 +8,57 @@
 
 # tickrs :crab:
 
-A Rust client for the [TwelveData API](https://twelvedata.com/docs#time-series) and others eventually, designed for efficient time series data analysis and financial market insights.
+A Rust toolkit for financial market data built around [TwelveData](https://twelvedata.com/docs) and [Alpha Vantage](https://www.alphavantage.co/documentation/).
 
->NOTE: :construction: This is an early-stage project and is still under development. Features and APIs will evolve. 
+> **Note:** :construction: Early-stage project — features and APIs are still evolving.
 
-## Overview
+## Services
 
-`tickrs` provides a type-safe, ergonomic interface to interact with TwelveData's financial market API. Built with performance in mind, it leverages `Polars` for fast DataFrame operations on time series data.
+| Service | Status | Description |
+|---------|--------|-------------|
+| **CLI** | Active | Command-line interface for querying market data |
+| **Clients** | Active | Type-safe Rust clients for TwelveData and Alpha Vantage |
+| **TUI** | Planned | Terminal UI with charts |
 
-## Features
+## CLI
 
-- **Flexible URL Builder** - Generic endpoint support with typed convenience methods
-- **Polars Integration** - Convert API responses directly to DataFrames for analysis
+See [CLI.md](CLI.md) for the full command reference.
 
-## Roadmap :construction:
+```bash
+# Symbol search
+cargo run -- search AAPL
+cargo run -- -p av search AAPL
 
-- [ ] Time series data retrieval and analysis
-- [ ] Polars transformations and aggregations
-- [ ] Historical data caching
-- [ ] Real-time data streaming support
+# Time series (OHLCV) — intervals: 1min 5min 15min 30min 1h 1day 1week 1month
+cargo run -- time-series AAPL -i 1day
+cargo run -- time-series AAPL -i 1day -s 2025-11-01 -e 2025-11-30
+cargo run -- -p av time-series AAPL -i 1week
 
-## Usage
+# End-of-day closing price (TwelveData only)
+cargo run -- eod AAPL 2025-12-01
 
-### Market Data
-
-```rust
-use tickrs::client::Twelvedata;
-use tickrs::marketdata::MarketData;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    let client = Twelvedata::new()?;
-    let market_data = MarketData { client: &client };
-    
-    // Get time series data with date range
-    let response = market_data.get_time_series(
-        "AAPL",
-        "1day",
-        Some("2025-11-01"),
-        Some("2025-11-30")
-    ).await?;
-    
-    let data: TimeSeriesResponse = response.json().await?;
-    let df = data.to_dataframe()?;
-    println!("{:?}", df);
-    
-    Ok(())
-}
+# Real-time quote
+cargo run -- quote AAPL
+cargo run -- -p av quote AAPL
 ```
 
-### Reference Data
+## Clients
 
 ```rust
-use tickrs::client::Twelvedata;
-use tickrs::reference_data::ReferenceData;
+// TwelveData
+let client = Twelvedata::new()?;
+let market = MarketData { client: &client };
+let df = market.get_time_series_data("AAPL", "1day", None, None).await?.to_dataframe()?;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    let client = Twelvedata::new()?;
-    let reference_data = ReferenceData { client: &client };
-    
-    // Search for symbols
-    let url = reference_data.get_symbol_search_url("RELIANCE")?;
-    println!("Symbol search URL: {}", url);
-    
-    Ok(())
-}
+// Alpha Vantage
+let client = AlphaVantage::new()?;
+let market = MarketData { client: &client };
+let df = market.get_time_series_data("AAPL", "1day").await?.to_dataframe()?;
 ```
 
+## Setup
+
+```
+API_KEY=<TwelveData API key>
+API_KEY_AV=<Alpha Vantage API key>
+```
