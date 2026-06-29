@@ -9,6 +9,7 @@ pub struct MarketData<'a> {
 }
 
 impl<'a> MarketData<'a> {
+    // url builders
     pub fn build_time_series_url(&self, symbol: &str, interval: &str) -> Result<Url> {
         let function = match interval {
             "1min" => "TIME_SERIES_INTRADAY",
@@ -39,6 +40,14 @@ impl<'a> MarketData<'a> {
         )
     }
 
+    pub fn build_search_url(&self, keywords: &str) -> Result<Url> {
+        self.client.build_url(
+            "/query",
+            &[("function", "SYMBOL_SEARCH"), ("keywords", keywords)],
+        )
+    }
+
+    // data builders
     pub async fn get_time_series_data(
         &self,
         symbol: &str,
@@ -57,13 +66,6 @@ impl<'a> MarketData<'a> {
         Ok(data)
     }
 
-    pub fn build_search_url(&self, keywords: &str) -> Result<Url> {
-        self.client.build_url(
-            "/query",
-            &[("function", "SYMBOL_SEARCH"), ("keywords", keywords)],
-        )
-    }
-
     pub async fn search(&self, keywords: &str) -> Result<SymbolSearchResponse> {
         let url = self.build_search_url(keywords)?;
         let response = self.client.make_request(url).await?;
@@ -74,42 +76,51 @@ impl<'a> MarketData<'a> {
 
 #[cfg(test)]
 mod tests {
-    use dotenv::dotenv;
-
     use crate::alpha_vantage::client::{AVError, AlphaVantage, Result};
     use crate::alpha_vantage::data::{SymbolSearchResponse, TimeSeriesResponse};
     use crate::alpha_vantage::market_data::MarketData as AlphaVantageMarket;
 
-    fn setup() -> Result<AlphaVantage> {
-        dotenv().ok();
-        AlphaVantage::new()
+    #[test]
+    fn test_build_time_series_url() -> Result<()> {
+        let client = AlphaVantage::test_client("https://www.alphavantage.co")?;
+        let md = AlphaVantageMarket { client: &client };
+        let url = md.build_time_series_url("AAPL", "1day")?;
+        let params: std::collections::HashMap<_, _> = url.query_pairs().collect();
+        assert_eq!(url.scheme(), "https");
+        assert_eq!(url.host_str(), Some("www.alphavantage.co"));
+        assert_eq!(url.path(), "/query");
+        assert_eq!(
+            params.get("function").map(|s| s.as_ref()),
+            Some("TIME_SERIES_DAILY")
+        );
+        assert_eq!(params.get("symbol").map(|s| s.as_ref()), Some("AAPL"));
+        assert!(params.contains_key("apikey"));
+        Ok(())
     }
 
     #[test]
-    fn test_build_time_series_url() -> Result<()> {
-        let client = setup()?;
+    fn test_build_search_url() -> Result<()> {
+        let client = AlphaVantage::test_client("https://www.alphavantage.co")?;
         let md = AlphaVantageMarket { client: &client };
-        let res_url = md.build_time_series_url("AAPL", "1day")?;
-
-        let url_str = res_url.as_str();
-        assert!(url_str.starts_with("https://www.alphavantage.co/query?"));
-        assert!(url_str.contains("function=TIME_SERIES_DAILY"));
-        assert!(url_str.contains("symbol=AAPL"));
-        assert!(url_str.contains("apikey="));
-
+        let url = md.build_search_url("tesco")?;
+        let params: std::collections::HashMap<_, _> = url.query_pairs().collect();
+        assert_eq!(url.scheme(), "https");
+        assert_eq!(url.host_str(), Some("www.alphavantage.co"));
+        assert_eq!(url.path(), "/query");
+        assert_eq!(
+            params.get("function").map(|s| s.as_ref()),
+            Some("SYMBOL_SEARCH")
+        );
+        assert_eq!(params.get("keywords").map(|s| s.as_ref()), Some("tesco"));
+        assert!(params.contains_key("apikey"));
         Ok(())
     }
 
     #[test]
     fn test_time_series_response_deserialization() -> Result<()> {
-        // Load the mock response from time_series_av.json
         let mock_json = include_str!("../../resources/time_series_av.json");
-
-        // Parse the JSON - this simulates what get_time_series_data does
-        // after receiving the HTTP response
-        let response: TimeSeriesResponse = serde_json::from_str(mock_json).map_err(|e| {
-            crate::alpha_vantage::client::AVError::Api(format!("JSON parse error: {}", e))
-        })?;
+        let response: TimeSeriesResponse = serde_json::from_str(mock_json)
+            .map_err(|e| AVError::Api(format!("JSON parse error: {}", e)))?;
 
         assert_eq!(response.time_series.len(), 22);
 
@@ -118,23 +129,14 @@ mod tests {
         assert_eq!(jan20.close, "291.3500");
         assert_eq!(jan20.volume, "7211706");
 
-        assert_eq!(response.time_series.get("2026-01-16").unwrap().close, "305.6700");
-        assert_eq!(response.time_series.get("2025-08-29").unwrap().close, "243.4900");
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_build_search_url() -> Result<()> {
-        let client = setup()?;
-        let md = AlphaVantageMarket { client: &client };
-        let res_url = md.build_search_url("tesco")?;
-
-        let url_str = res_url.as_str();
-        assert!(url_str.starts_with("https://www.alphavantage.co/query?"));
-        assert!(url_str.contains("function=SYMBOL_SEARCH"));
-        assert!(url_str.contains("keywords=tesco"));
-        assert!(url_str.contains("apikey="));
+        assert_eq!(
+            response.time_series.get("2026-01-16").unwrap().close,
+            "305.6700"
+        );
+        assert_eq!(
+            response.time_series.get("2025-08-29").unwrap().close,
+            "243.4900"
+        );
 
         Ok(())
     }
@@ -166,6 +168,33 @@ mod tests {
         assert_eq!(response.best_matches[0].instrument_type, "Equity");
         assert_eq!(response.best_matches[0].region, "United Kingdom");
         assert_eq!(response.best_matches[0].currency, "GBX");
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_get_time_series_data() -> Result<()> {
+        use httpmock::prelude::*;
+
+        let server = MockServer::start();
+        let mock_json = include_str!("../../resources/time_series_av.json");
+
+        let _mock = server.mock(|when, then| {
+            when.method(GET).path("/query");
+            then.status(200)
+                .header("content-type", "application/json")
+                .body(mock_json);
+        });
+
+        let client = AlphaVantage::test_client(&server.base_url())?;
+        let md = AlphaVantageMarket { client: &client };
+        let result = md.get_time_series_data("AAPL", "1day").await?;
+
+        assert_eq!(result.time_series.len(), 22);
+        assert_eq!(
+            result.time_series.get("2026-01-20").unwrap().close,
+            "291.3500"
+        );
 
         Ok(())
     }

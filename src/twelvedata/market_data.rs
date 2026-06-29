@@ -70,8 +70,6 @@ impl<'a> MarketData<'a> {
 
 #[cfg(test)]
 mod tests {
-    use dotenv::dotenv;
-
     use crate::twelvedata::{
         client::{Result, Twelvedata},
         market_data::MarketData,
@@ -79,8 +77,7 @@ mod tests {
 
     #[test]
     fn test_time_series_url_withstart() -> Result<()> {
-        dotenv().ok();
-        let client = Twelvedata::new()?;
+        let client = Twelvedata::test_client("https://api.twelvedata.com")?;
         let market_data = MarketData { client: &client };
         let ts_url = market_data.build_time_series_url(
             "RELIANCE",
@@ -119,8 +116,7 @@ mod tests {
 
     #[test]
     fn test_time_series_url() -> Result<()> {
-        dotenv().ok();
-        let client = Twelvedata::new()?;
+        let client = Twelvedata::test_client("https://api.twelvedata.com")?;
         let market_data = MarketData { client: &client };
         let ts_url = market_data.build_time_series_url("RELIANCE", "1day", None, None)?;
 
@@ -146,9 +142,7 @@ mod tests {
 
     #[test]
     fn test_eod_url() -> Result<()> {
-        dotenv().ok();
-
-        let client = Twelvedata::new()?;
+        let client = Twelvedata::test_client("https://api.twelvedata.com")?;
         let market_data = MarketData { client: &client };
         let eod_url = market_data.build_eod_url("TATA", "2025-11-20")?;
         assert!(eod_url

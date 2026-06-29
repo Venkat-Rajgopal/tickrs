@@ -75,46 +75,41 @@ impl Twelvedata {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::twelvedata::client::{Result, Twelvedata};
-    use dotenv::dotenv;
-
-    impl Twelvedata {
-        pub fn test_client(base_url: &str) -> Result<Self> {
-            use reqwest::Client;
-            use url::Url;
-
-            let api_key = "test_api_key".to_string();
-            let base_url = Url::parse(base_url)?;
-
-            Ok(Self {
-                client: Client::new(),
-                api_key,
-                base_url,
-            })
-        }
+impl Twelvedata {
+    pub fn test_client(base_url: &str) -> Result<Self> {
+        Ok(Self {
+            client: reqwest::Client::new(),
+            api_key: "test_api_key".to_string(),
+            base_url: Url::parse(base_url)?,
+        })
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Result, Twelvedata};
 
     #[test]
-    fn test_generic_build_url() -> Result<()> {
-        dotenv().ok();
-
-        let client = Twelvedata::new()?;
+    fn test_build_url() -> Result<()> {
+        let client = Twelvedata::test_client("https://api.twelvedata.com")?;
         let url = client.build_url("quote", &[("symbol", "MSFT"), ("interval", "1day")])?;
-        assert!(url.as_str().contains("symbol=MSFT"));
-        assert!(url.as_str().contains("interval=1day"));
+        let params: std::collections::HashMap<_, _> = url.query_pairs().collect();
+        assert_eq!(url.scheme(), "https");
+        assert_eq!(url.host_str(), Some("api.twelvedata.com"));
+        assert_eq!(url.path(), "/quote");
+        assert_eq!(params.get("symbol").map(|s| s.as_ref()), Some("MSFT"));
+        assert_eq!(params.get("interval").map(|s| s.as_ref()), Some("1day"));
+        assert!(params.contains_key("apikey"));
         Ok(())
     }
 
     #[test]
-    fn test_build_eod_url() -> Result<()> {
-        dotenv().ok();
-        let client = Twelvedata::new()?;
+    fn test_build_url_encodes_special_chars() -> Result<()> {
+        let client = Twelvedata::test_client("https://api.twelvedata.com")?;
         let url = client.build_url("eod", &[("symbol", "L&T"), ("date", "2025-12-01")])?;
         assert!(url
             .as_str()
             .starts_with("https://api.twelvedata.com/eod?symbol=L%26T&date=2025-12-01"));
-
         Ok(())
     }
 }

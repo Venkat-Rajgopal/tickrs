@@ -73,3 +73,42 @@ impl AlphaVantage {
         }
     }
 }
+
+#[cfg(test)]
+impl AlphaVantage {
+    pub fn test_client(base_url: &str) -> Result<Self> {
+        use reqwest::Client;
+        use url::Url;
+
+        Ok(Self {
+            client: Client::new(),
+            api_key: "test_api_key".to_string(),
+            base_url: Url::parse(base_url)?,
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{AlphaVantage, Result};
+
+    #[test]
+    fn test_build_url() -> Result<()> {
+        let client = AlphaVantage::test_client("https://www.alphavantage.co")?;
+        let url = client.build_url(
+            "/query",
+            &[("function", "GLOBAL_QUOTE"), ("symbol", "AAPL")],
+        )?;
+        let params: std::collections::HashMap<_, _> = url.query_pairs().collect();
+        assert_eq!(url.scheme(), "https");
+        assert_eq!(url.host_str(), Some("www.alphavantage.co"));
+        assert_eq!(url.path(), "/query");
+        assert_eq!(
+            params.get("function").map(|s| s.as_ref()),
+            Some("GLOBAL_QUOTE")
+        );
+        assert_eq!(params.get("symbol").map(|s| s.as_ref()), Some("AAPL"));
+        assert!(params.contains_key("apikey"));
+        Ok(())
+    }
+}

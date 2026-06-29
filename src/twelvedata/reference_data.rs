@@ -24,8 +24,6 @@ impl<'a> ReferenceData<'a> {
 
 #[cfg(test)]
 mod tests {
-    use dotenv::dotenv;
-
     use crate::twelvedata::{
         client::{Result, Twelvedata},
         reference_data::ReferenceData,
@@ -33,8 +31,7 @@ mod tests {
 
     #[test]
     fn test_get_symbol_search_url() -> Result<()> {
-        dotenv().ok();
-        let client = Twelvedata::new()?;
+        let client = Twelvedata::test_client("https://api.twelvedata.com")?;
         let reference_data = ReferenceData { client: &client };
 
         let result = reference_data.build_symbol_search_url("RELIANCE")?;
