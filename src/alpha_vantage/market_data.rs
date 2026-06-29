@@ -1,7 +1,7 @@
 use url::Url;
 
 use crate::alpha_vantage::client::{AlphaVantage, Result};
-use crate::alpha_vantage::data::{SymbolSearchResponse, TimeSeriesResponse};
+use crate::alpha_vantage::data::{QuoteResponse, SymbolSearchResponse, TimeSeriesResponse};
 
 // Holds a reference to the AlphaVantage client
 pub struct MarketData<'a> {
@@ -59,10 +59,10 @@ impl<'a> MarketData<'a> {
         Ok(data)
     }
 
-    pub async fn get_quote(&self, symbol: &str) -> Result<serde_json::Value> {
+    pub async fn get_quote(&self, symbol: &str) -> Result<QuoteResponse> {
         let url = self.build_quote_url(symbol)?;
         let response = self.client.make_request(url).await?;
-        let data = response.json::<serde_json::Value>().await?;
+        let data = response.json::<QuoteResponse>().await?;
         Ok(data)
     }
 

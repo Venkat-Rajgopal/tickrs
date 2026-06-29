@@ -1,3 +1,5 @@
+[![CI](https://github.com/Venkat-Rajgopal/tickrs/actions/workflows/ci.yml/badge.svg)](https://github.com/Venkat-Rajgopal/tickrs/actions/workflows/ci.yml)
+
 ```
  ██   ▀▀        ▄▄                   
 ▀██▀▀ ██  ▄████ ██ ▄█▀ ████▄ ▄█▀▀▀   

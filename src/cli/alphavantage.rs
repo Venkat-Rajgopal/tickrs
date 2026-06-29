@@ -10,16 +10,9 @@ pub async fn run(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
     match command {
         Commands::Search { symbol } => {
             let response = market.search(&symbol).await?;
-            println!(
-                "{:<12} {:<40} {:<10} {:<20} {}",
-                "Symbol", "Name", "Type", "Region", "Score"
-            );
-            println!("{}", "-".repeat(100));
-            for m in &response.best_matches {
-                println!(
-                    "{:<12} {:<40} {:<10} {:<20} {}",
-                    m.symbol, m.name, m.instrument_type, m.region, m.match_score
-                );
+            match response.to_dataframe() {
+                Ok(df) => println!("{}", df),
+                Err(e) => eprintln!("Error creating DataFrame: {}", e),
             }
         }
         Commands::TimeSeries {
@@ -47,7 +40,10 @@ pub async fn run(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::Quote { symbol } => {
             let response = market.get_quote(&symbol).await?;
-            println!("{}", serde_json::to_string_pretty(&response)?);
+            match response.to_dataframe() {
+                Ok(df) => println!("{}", df),
+                Err(e) => eprintln!("Error creating DataFrame: {}", e),
+            }
         }
     }
 

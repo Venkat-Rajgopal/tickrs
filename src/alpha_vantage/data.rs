@@ -13,6 +13,35 @@ pub struct SymbolSearchResponse {
     pub best_matches: Vec<SymbolMatch>,
 }
 
+impl ToDataFrame for SymbolSearchResponse {
+    fn to_dataframe(&self) -> PolarsResult<DataFrame> {
+        let mut symbols = Vec::new();
+        let mut names = Vec::new();
+        let mut types = Vec::new();
+        let mut regions = Vec::new();
+        let mut currencies = Vec::new();
+        let mut scores = Vec::new();
+
+        for m in &self.best_matches {
+            symbols.push(m.symbol.clone());
+            names.push(m.name.clone());
+            types.push(m.instrument_type.clone());
+            regions.push(m.region.clone());
+            currencies.push(m.currency.clone());
+            scores.push(m.match_score.parse::<f64>().unwrap_or(0.0));
+        }
+
+        DataFrame::new(vec![
+            Series::new("symbol".into(), symbols),
+            Series::new("name".into(), names),
+            Series::new("type".into(), types),
+            Series::new("region".into(), regions),
+            Series::new("currency".into(), currencies),
+            Series::new("match_score".into(), scores),
+        ])
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SymbolMatch {
     #[serde(rename = "1. symbol")]
@@ -33,6 +62,70 @@ pub struct SymbolMatch {
     pub currency: String,
     #[serde(rename = "9. matchScore")]
     pub match_score: String,
+}
+
+// ===== GLOBAL QUOTE RESPONSE STRUCTURE =====
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QuoteResponse {
+    #[serde(rename = "Global Quote")]
+    pub global_quote: GlobalQuote,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GlobalQuote {
+    #[serde(rename = "01. symbol")]
+    pub symbol: String,
+    #[serde(rename = "02. open")]
+    pub open: String,
+    #[serde(rename = "03. high")]
+    pub high: String,
+    #[serde(rename = "04. low")]
+    pub low: String,
+    #[serde(rename = "05. price")]
+    pub price: String,
+    #[serde(rename = "06. volume")]
+    pub volume: String,
+    #[serde(rename = "07. latest trading day")]
+    pub latest_trading_day: String,
+    #[serde(rename = "08. previous close")]
+    pub previous_close: String,
+    #[serde(rename = "09. change")]
+    pub change: String,
+    #[serde(rename = "10. change percent")]
+    pub change_percent: String,
+}
+
+impl ToDataFrame for QuoteResponse {
+    fn to_dataframe(&self) -> PolarsResult<DataFrame> {
+        let q = &self.global_quote;
+        let change_pct = q
+            .change_percent
+            .trim_end_matches('%')
+            .parse::<f64>()
+            .unwrap_or(0.0);
+        DataFrame::new(vec![
+            Series::new("symbol".into(), vec![q.symbol.clone()]),
+            Series::new(
+                "latest_trading_day".into(),
+                vec![q.latest_trading_day.clone()],
+            ),
+            Series::new("open".into(), vec![q.open.parse::<f64>().unwrap_or(0.0)]),
+            Series::new("high".into(), vec![q.high.parse::<f64>().unwrap_or(0.0)]),
+            Series::new("low".into(), vec![q.low.parse::<f64>().unwrap_or(0.0)]),
+            Series::new("price".into(), vec![q.price.parse::<f64>().unwrap_or(0.0)]),
+            Series::new("volume".into(), vec![q.volume.parse::<i64>().unwrap_or(0)]),
+            Series::new(
+                "previous_close".into(),
+                vec![q.previous_close.parse::<f64>().unwrap_or(0.0)],
+            ),
+            Series::new(
+                "change".into(),
+                vec![q.change.parse::<f64>().unwrap_or(0.0)],
+            ),
+            Series::new("change_percent".into(), vec![change_pct]),
+        ])
+    }
 }
 
 // ===== TIME SERIES RESPONSE STRUCTURES =====
