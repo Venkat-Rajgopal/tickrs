@@ -63,7 +63,7 @@ impl Interval {
 
 #[derive(Parser)]
 #[command(name = "tickrs")]
-#[command(about = "tickrs — financial data CLI", long_about = None)]
+#[command(about = "tickrs 🦀 — financial data CLI", long_about = None)]
 pub struct Cli {
     /// Data provider
     #[arg(short, long, default_value = "12d", global = true)]
